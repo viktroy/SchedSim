@@ -4,19 +4,78 @@ public class SchedSim {
 	
 	public static void main(String[] args) {
 		
-		PCB[] processes = new PCB[NUM_PROCESSES];
-		//FCFSQueue fcfs = new FCFSQueue();
+		FCFSQueue fcfs = new FCFSQueue();
+		SJFQueue sjf = new SJFQueue();
+		PriorityQueue priority = new PriorityQueue();
+		RRQueue roundRobin = new RRQueue(6);
+
 		for (int i=0; i<NUM_PROCESSES; i++) {
 			PCB newProc = new PCB(i);
-			processes[i] = newProc;
-			//boolean pushed = fcfs.push(newProc);
+			PCB newProcSJFCpy = new PCB(newProc);
+			PCB newProcPryCpy = new PCB(newProc);
+			PCB newProcRRCpy = new PCB(newProc);
+			PCB newProcMFCpy = new PCB(newProc);
+			fcfs.add(i, newProc);
+			sjf.add(i, newProcSJFCpy);
+			priority.add(i, newProcPryCpy);
+			roundRobin.add(i, newProcRRCpy);
 		}
-		//System.out.println(fcfs);
-		fcfs(processes);
-		//sjf(processes);
-		//priority(processes);
+		/*
+		System.out.println("FCFS:");
+		System.out.println(fcfs);
+		execute(fcfs);
+
+		System.out.println("SJF:");
+		System.out.println(sjf);
+		execute(sjf);
+		
+		System.out.println("Priority:");
+		System.out.println(priority);
+		execute(priority);
+		*/
+
+		System.out.println("Round Robin:");
+		System.out.println(roundRobin);
+		execute(roundRobin);
 	}
-	
+
+	public static void execute(SchedQueue queue) {
+		double totalWaitingTime = 0;
+		double avgWaitingTime = 0;
+		double totalTurnaroundTime = 0;
+		double avgTurnaroundTime = 0;
+
+		while (! queue.isDone()) {
+			PCB currProc = queue.peek();
+			int numBurst;
+			if((queue instanceof RRQueue) && queue.quantum < currProc.getBurstTime()) {
+				numBurst = queue.quantum;
+			} else {
+				numBurst = currProc.getBurstTime();
+			}
+				for (int j=0; j<numBurst; j++) {
+					try {
+						currProc.giveBurst();
+						for (int k=0; k<queue.size(); k++) {
+							if (queue.get(k).getBurstTime() != 0 && !queue.get(k).equals(currProc)) {
+								queue.get(k).giveWait();
+							}
+						}		
+					} catch (InterruptedException e) {
+						j--;
+					}
+				}
+			totalWaitingTime += currProc.waitTime;
+			totalTurnaroundTime += currProc.turnTime;
+			System.out.println("Process " + currProc.getID() + " terminated.");
+			System.out.println(queue);
+		}
+		avgWaitingTime = totalWaitingTime / (double)queue.size();
+		avgTurnaroundTime = totalTurnaroundTime / (double)queue.size();
+		System.out.println("Avg Waiting Time: " + avgWaitingTime);
+		System.out.println("Avg Turnaround Time: " + avgTurnaroundTime);
+	}
+/*	
 	public static void fcfs(PCB[] processes) {
 	//Takes an array of PCB objects and runs them under FCFS scheduling, displaying output to console.
 	//Assumes the number of processes (NUM_PROCESSES) <= the capacity of the queue.
@@ -26,7 +85,7 @@ public class SchedSim {
 		FCFSQueue fcfs = new FCFSQueue();
 		boolean pushed;
 		for (int i=0; i<numProcs; i++) {
-			pushed = fcfs.push(processes[i]);
+			pushed = fcfs.add(processes[i]);
 			if (!pushed) {
 				System.out.println("Process " + i + " not added. Queue is full.");
 			}
@@ -41,8 +100,8 @@ public class SchedSim {
 				try {
 					currProc.giveBurst();
 					for (int j=0; j<numProcs; j++) {
-						if (fcfs.peek(j).getBurstTime() != 0 && !fcfs.peek(j).equals(currProc)) {
-							fcfs.peek(j).giveWait();
+						if (fcfs.get(j).getBurstTime() != 0 && !fcfs.get(j).equals(currProc)) {
+							fcfs.get(j).giveWait();
 						}
 					}		
 				} catch (InterruptedException e) {
@@ -138,4 +197,5 @@ public class SchedSim {
 		System.out.println("Average Waiting Time: " + avgWaitingTime);
 
 	}
+*/
 }

@@ -1,8 +1,10 @@
 import java.util.Random.*;
 
 public class PCB {
-	
-//Simulates a Process Control Block for a process in the CPU Scheduler. Stores process id, burst time, and priority.
+/*
+	Object that represents a Process Control Block for a process in the simulated CPU Scheduler. Stores process id, burst time, and priority. Maintains waiting
+	and turnaround times for each process.
+*/
 	
 	//Class variables
 	int id;
@@ -31,6 +33,12 @@ public class PCB {
 		id = procID;
 		burst = burstTime;
 		priority = priorityLevel;
+	}
+
+	PCB(PCB proc) {
+		id = proc.id;
+		burst = proc.burst;
+		priority = proc.priority;
 	}
 	
 	public int getID() {
