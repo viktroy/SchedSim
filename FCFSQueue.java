@@ -4,6 +4,9 @@ public class FCFSQueue extends SchedQueue {
 /*
 	Simulates a First-Come, First-Served ready queue of processes waiting to be executed by the CPU scheduler.
 */
+	FCFSQueue() {
+		super.type = "FCFS";
+	}
 	
 	public PCB peek() {
 	//Returns the nest process to be executed without removing it from the FCFSQueue.

@@ -4,7 +4,10 @@ public class PriorityQueue extends SchedQueue {
 /*
 	Simulates a Priority ready queue of processes waiting to be executed by the CPU scheduler.
 */
-
+	PriorityQueue() {
+		super.type = "Priority";
+	}
+	
 	public PCB peek() {
 	//Returns the nest process to be executed without removing it from the PriorityQueue.
 		int j=0;

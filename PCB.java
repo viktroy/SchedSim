@@ -11,7 +11,8 @@ public class PCB {
 	int burst;
 	int priority;
 	int waitTime = 0;
-	int turnTime = 0;	
+	int turnTime = 0;
+	int burstsRecd = 0;	
 	
 	//Constructors
 	PCB(int procID) {
@@ -63,6 +64,7 @@ public class PCB {
 	
 	public void giveBurst() throws InterruptedException {
 		Thread.sleep(300);
+		burstsRecd++;
 		burst--;
 		turnTime++;
 	}
