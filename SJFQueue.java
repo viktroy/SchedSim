@@ -4,6 +4,9 @@ public class SJFQueue extends SchedQueue {
 /*
 	Simulates a Shortest Job First ready queue of processes waiting to be executed by the CPU scheduler.
 */
+	SJFQueue() {
+		super.type = "SJF";
+	}
 
 	public PCB peek() {
 	//Returns the nest process to be executed without removing it from the SJFQueue.
