@@ -1,13 +1,18 @@
+import java.util.*;
+import java.io.*;
+
 public class SchedSim {
 	
-	public static final int NUM_PROCESSES = 7;
+	public static final int NUM_PROCESSES = 10;
 	
 	public static void main(String[] args) {
-
-		demo();
+		
+		try {
+			demo();
+		} catch (IOException e) {}
 	}
 
-	public static void demo() {
+	public static void demo() throws IOException {
 
 		//Create instances of queue classes to demo.
 		FCFSQueue fcfs = new FCFSQueue();
@@ -32,27 +37,21 @@ public class SchedSim {
 			roundRobin.add(i, newProcRRCpy);
 			mlf.add(newProcMLFCpy);						//See add(PCB) method in MLFQueue class.
 		}
-		/*
-		System.out.println("FCFS:");
-		System.out.println(fcfs);
+		
+		System.out.println(fcfs);						//Prints the processes just created.
+
 		fcfs.execute();
-
-		System.out.println("SJF:");
-		System.out.println(sjf);
 		sjf.execute();
-
-		System.out.println("Priority:");
-		System.out.println(priority);
 		priority.execute();
-		
-		
-		System.out.println("Round Robin:");
-		System.out.println(roundRobin);
 		roundRobin.execute();
-		*/
-
-		System.out.println("Multi-Level Feeback Queue:");
-		System.out.println(mlf);
 		mlf.execute();
+		
+
+		System.out.println("\tAlgorithm\tAvg Waiting Time\tAvg Turnaround Time");
+		System.out.printf("\tFCFS\t\t\t%.2f\t\t\t%.2f\n", (fcfs.totalWaitingTime / (double) NUM_PROCESSES), (fcfs.totalTurnaroundTime / (double) NUM_PROCESSES));
+		System.out.printf("\tSJF\t\t\t%.2f\t\t\t%.2f\n", (sjf.totalWaitingTime / (double) NUM_PROCESSES), (sjf.totalTurnaroundTime / (double) NUM_PROCESSES));
+		System.out.printf("\tPriority\t\t%.2f\t\t\t%.2f\n", (priority.totalWaitingTime / (double) NUM_PROCESSES), (priority.totalTurnaroundTime / (double) NUM_PROCESSES));
+		System.out.printf("\tRound Robin\t\t%.2f\t\t\t%.2f\n", (roundRobin.totalWaitingTime / (double) NUM_PROCESSES), (roundRobin.totalTurnaroundTime / (double) NUM_PROCESSES));
+		System.out.printf("\tMulti-Level\t\t%.2f\t\t\t%.2f\n", (mlf.totalWaitingTime / (double) NUM_PROCESSES), (mlf.totalTurnaroundTime / (double) NUM_PROCESSES));
 	}
 }

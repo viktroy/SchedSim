@@ -1,4 +1,5 @@
 import java.util.*;
+import java.io.*;
 
 public class MLFQueue extends ArrayList<SchedQueue> {
 /*
@@ -9,13 +10,11 @@ public class MLFQueue extends ArrayList<SchedQueue> {
 	private ArrayList<Double> cpuPortions = new ArrayList<Double>(MAX_QUEUES);
 	SchedQueue currQueue;
 	int peekCount = 0;
-	//int currInsertIndex = 0;
 	double totalWaitingTime = 0;
 	double totalTurnaroundTime = 0;
 
 	public void add(PCB proc) {
-		this.get(0).add(proc);
-		//currInsertIndex = (currInsertIndex + 1) % this.size();
+		get(0).add(proc);
 	}
 
 	public void addQueue(SchedQueue queue, double cpuPortion) {
@@ -31,7 +30,6 @@ public class MLFQueue extends ArrayList<SchedQueue> {
 			if (randNum <= accum) {
 				currQueue = this.get(i);
 				peekCount = 0;
-				System.out.println("Queue " + this.indexOf(currQueue) + " selected");
 				break;
 			}
 		}
@@ -44,39 +42,10 @@ public class MLFQueue extends ArrayList<SchedQueue> {
 			updateCurrQueue();
 		}
 		PCB currProc = currQueue.peek();
-		if (currProc.burstsRecd == currQueue.quantum - 1) {
-			demote(currProc);
-		}
+		//System.out.println("currIndex = " + currQueue.currIndex);
+		
 		return currProc;
 	}
-		/*
-		//Check to see if the maximum quantum of the queues has already been given (
-		if ((peekCount == this.getMaxQuantum())) {
-			System.out.println(this.getMaxQuantum() + " bursts given to queue " + this.indexOf(currQueue));
-			this.updateCurrQueue();
-			//peakCount = 0;
-		}
-		peekCount++;
-		
-		while (currQueue.isEmpty()) {
-			System.out.println("Queue " + this.indexOf(currQueue) + " is empty");
-			this.updateCurrQueue();
-			//peekCount = 0;
-		}
-		//System.out.println("12 CPU Bursts allocated to queue " + this.indexOf(currQueue));
-		System.out.println("CPU bursts allocated to queue " + this.indexOf(currQueue));
-		PCB currProc = currQueue.peek();
-		while (currProc.burstsRecd == currQueue.quantum) {
-			this.demote(currProc);
-			if (currQueue.isEmpty()) {
-				this.updateCurrQueue();
-			}
-			currProc = currQueue.peek();
-		}
-		currProc.burstsRecd++;
-		return currProc;
-		*/
-	//}
 
 	public void demote(PCB proc) {
 		boolean removed = false;
@@ -85,7 +54,7 @@ public class MLFQueue extends ArrayList<SchedQueue> {
 			removed = this.get(i).remove(proc);
 			if (removed) {
 				proc.burstsRecd = 0;
-				int j = i+1;
+				int j = Math.min(i+1, (size() - 1));
 				added = this.get(j).add(proc);
 				while (! added && j<(this.size()-1)) {
 					j++;
@@ -105,24 +74,19 @@ public class MLFQueue extends ArrayList<SchedQueue> {
 		return true;
 	}
 
-/*
-	public int getMaxQuantum() {
-		int maxQuantum = 1;
-		for (int i=0; i<this.size(); i++) {
-			if (this.get(i) instanceof RRQueue) {
-				if (this.get(i).quantum > maxQuantum) {
-					maxQuantum = this.get(i).quantum;
-				}
-			}
-		}
-		return maxQuantum;
-	}
-*/
-
-	public void execute() {
+	public void execute() throws IOException {
 	
+		File outFile = new File("MLFOut.txt");
+		FileWriter outWriter = new FileWriter(outFile);
+		BufferedWriter outBuff = new BufferedWriter(outWriter);
+
+		outBuff.write("MLF");
+		outBuff.newLine();
+
 		while (! this.isDone()) {
 			PCB proc = peek();
+			outBuff.write("Queue " + indexOf(currQueue) + " selected.");
+			outBuff.newLine();
 			try {
 				proc.giveBurst();
 				for (int i=0; i<size(); i++) {
@@ -133,20 +97,30 @@ public class MLFQueue extends ArrayList<SchedQueue> {
 						}
 					}
 				}
+				//System.out.println(this);											//Uncomment to print the queue after each CPU burst.
 			} catch (InterruptedException e) {}
+			outBuff.write("Process " + proc.getID() + " receives a CPU burst. " + proc.getBurstTime() + " remaining.");
+			outBuff.newLine();
 			if (proc.getBurstTime() == 0) {
 				totalWaitingTime += proc.waitTime;
 				totalTurnaroundTime += proc.turnTime;
-				System.out.println("Process " + proc.getID() + " terminated.");
-				System.out.println(this);
+				outBuff.write("Process " + proc.getID() + " terminated.");
+				outBuff.newLine();
+				//System.out.println(this);											//Uncomment to print the queue when a process terminates.
 			} else {
-				System.out.println("Process " + proc.getID() + " receives a CPU burst.");
+				if (proc.burstsRecd == currQueue.quantum) {
+					currQueue.currIndex = currQueue.indexOf(proc);					//Added to prevent skipping a process after a demotion.
+					demote(proc);
+					outBuff.write("Process " + proc.getID() + " demoted.");
+					outBuff.newLine();
+					//System.out.println(this);										//Uncomment to print the queue when a process is demoted.
+				}
 			}
 		}
-		double avgWaitingTime = totalWaitingTime / (double)this.size();
-		double avgTurnaroundTime = totalTurnaroundTime / (double)this.size();
-		System.out.println("Avg Waiting Time: " + avgWaitingTime);
-		System.out.println("Avg Turnaround Time: " + avgTurnaroundTime);
+
+		outBuff.close();
+		System.out.println("MLF:");
+		System.out.println(this);
 	}
 
 	public String toString() {

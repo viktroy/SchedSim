@@ -1,11 +1,15 @@
 import java.util.*;
+import java.io.*;
 
 public class SchedQueue extends ArrayList<PCB> {
 /*
 	A superclass representing a generic queue of PCB objects.
 */
 
+
 	int quantum = -1;
+	int peekCount;
+	int currIndex;						//Added for RRQueue handling demotion in MLFQueue
 	double totalWaitingTime = 0;
 	double totalTurnaroundTime = 0;
 	String type = "Queue";
@@ -32,8 +36,18 @@ public class SchedQueue extends ArrayList<PCB> {
 		}
 	}
 
-	public void execute() {
+	public void execute() throws IOException {
+		
+		String outFileName = type + "Out.txt"; 
+		File outFile = new File(outFileName);
+		FileWriter outWriter = new FileWriter(outFile);
+		BufferedWriter outBuff = new BufferedWriter(outWriter);
+
+		outBuff.write(type);
+		outBuff.newLine();
+
 		while (! this.isDone()) {
+			
 			PCB proc = this.peek();
 			try {
 				proc.giveBurst();
@@ -42,21 +56,24 @@ public class SchedQueue extends ArrayList<PCB> {
 					if (nextPCB.getBurstTime() != 0 && !nextPCB.equals(proc)) {
 						nextPCB.giveWait();
 					}
+				//System.out.println(this);										//Uncomment to print the queue after each CPU burst.	
 				}		
 			} catch (InterruptedException e) {}
+			outBuff.write("Process " + proc.getID() + " receives a CPU burst. " + proc.getBurstTime() + " remaining.");
+			outBuff.newLine();
 			if (proc.getBurstTime() == 0) {
 				totalWaitingTime += proc.waitTime;
 				totalTurnaroundTime += proc.turnTime;
-				System.out.println("Process " + proc.getID() + " terminated.");
-				System.out.println(this);
-			} else {
-				System.out.println("Process " + proc.getID() + " receives a CPU burst.");
+				outBuff.write("Process " + proc.getID() + " terminated.");
+				outBuff.newLine();
+				//System.out.println(this);										//Uncomment to print the queue when a process is terminated.
 			}
 		}
-		double avgWaitingTime = totalWaitingTime / (double)this.size();
-		double avgTurnaroundTime = totalTurnaroundTime / (double)this.size();
-		System.out.println("Avg Waiting Time: " + avgWaitingTime);
-		System.out.println("Avg Turnaround Time: " + avgTurnaroundTime);
+
+		outBuff.close();
+		System.out.println(type + ":");
+		System.out.println(this);
+		
 	}
 
 	public String toString() {

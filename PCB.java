@@ -12,14 +12,19 @@ public class PCB {
 	int priority;
 	int waitTime = 0;
 	int turnTime = 0;
-	int burstsRecd = 0;	
+	int burstsRecd = 0;
+
+	public static final int MAX_BURST_TIME = 25;
+	public static final int MAX_PRIORITY = 5;
+	public static final int BURST_WAIT = 10;	
 	
 	//Constructors
 	PCB(int procID) {
-	//If only ID is given, set burst time and priority to random values. 
+	//If only ID is given, set burst time and priority to random values.
+
 		id = procID;
-		burst = (int)(Math.random() * (10-1)) + 1;
-		priority = (int)(Math.random() * (5-1)) + 1;
+		burst = (int)(Math.random() * (MAX_BURST_TIME - 1)) + 1;
+		priority = (int)(Math.random() * (MAX_PRIORITY - 1)) + 1;
 	}
 	
 	PCB(int procID, int burstTime) {
@@ -63,7 +68,7 @@ public class PCB {
 	}
 	
 	public void giveBurst() throws InterruptedException {
-		Thread.sleep(300);
+		Thread.sleep(BURST_WAIT);
 		burstsRecd++;
 		burst--;
 		turnTime++;
